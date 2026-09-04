@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AeroCare AI - Personalized Air & Weather Health Advisor</title>
+  <meta name="description" content="Real-time atmospheric intelligence translated into personalized, plain-English health advisories tailored to your unique respiratory vulnerabilities and lifestyle.">
+  
+  <!-- Modern Typography from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🫁</text></svg>">
+</head>
+<body>
+  <!-- Ambient background glow effects -->
+  <div class="ambient-glow glow-top" id="ambientGlowTop"></div>
+  <div class="ambient-glow glow-bottom" id="ambientGlowBottom"></div>
+
+  <!-- Top Application Bar -->
+  <header class="app-header" id="appHeader">
+    <div class="header-container">
+      <div class="brand-section">
+        <div class="brand-logo-wrap">
+          <div class="brand-icon-pulse"></div>
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+            <path d="M9 13a3 3 0 0 1 3-3c1.5 0 2.5 1 3 2"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">AeroCare <span class="brand-accent">AI</span></h1>
+          <span class="brand-subtitle">Personalized Air & Health Advisor</span>
+        </div>
+      </div>
+
+      <!-- Center: Search & Location -->
+      <div class="location-search-wrapper">
+        <div class="search-input-group" id="searchGroup">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="citySearchInput" placeholder="Search city or region (e.g. New York, Delhi, London)..." autocomplete="off">
+          <button id="locateMeBtn" class="btn-icon" title="Detect My Location (GPS)" aria-label="Detect My Location">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+            </svg>
+          </button>
+        </div>
+        <!-- Autocomplete Suggestions Dropdown -->
+        <div class="search-dropdown hidden" id="searchDropdown"></div>
+      </div>
+
+      <!-- Right: Profile Pill & Controls -->
+      <div class="header-actions">
+        <!-- Engine Status Badge -->
+        <div class="engine-badge" id="engineBadge" title="Advisory synthesis engine">
+          <span class="engine-dot"></span>
+          <span id="engineBadgeText">AI Ready</span>
+        </div>
+
+        <!-- Active Profile Button -->
+        <button id="profileBtn" class="btn-profile-pill" aria-label="Manage Profile">
+          <div class="profile-avatar" id="headerProfileAvatar">👤</div>
+          <div class="profile-pill-meta">
+            <span class="profile-pill-label">Active Profile</span>
+            <span class="profile-pill-name" id="headerProfileName">Setup Profile</span>
+          </div>
+          <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+
+        <!-- Compare Demo Button (Judge Showcase) -->
+        <button id="openCompareBtn" class="btn-secondary btn-demo-highlight" title="Compare how identical conditions affect different health profiles">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-svg">
+            <path d="M16 3h5v5"/>
+            <path d="M8 21H3v-5"/>
+            <path d="M21 3 14 10"/>
+            <path d="m3 21 7-7"/>
+          </svg>
+          <span>Compare Demo</span>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button id="themeToggleBtn" class="btn-icon" title="Toggle Theme" aria-label="Toggle Theme">
+          <svg id="themeIconSun" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-content">
+    <div class="content-container">
+
+      <!-- Live Location Banner & Quick Switcher -->
+      <div class="location-banner">
+        <div class="location-info">
+          <div class="location-pin-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pin-icon">
+              <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <div>
+            <span class="location-eyebrow">MONITORED ATMOSPHERE</span>
+            <h2 class="location-name" id="currentLocationName">Locating atmospheric station...</h2>
+            <span class="location-coordinates" id="currentLocationCoords">Coordinates: --</span>
+          </div>
+        </div>
+
+        <div class="banner-right-tools">
+          <span class="live-pulse-badge">
+            <span class="pulse-ring"></span>
+            <span class="pulse-dot"></span>
+            LIVE METEOROLOGY
+          </span>
+          <button id="refreshDataBtn" class="btn-outline btn-sm" title="Re-fetch conditions and regenerate advisory">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="refresh-svg">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+            </svg>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Dashboard Grid: Weather & AQI (Left/Center) + Personalized Advisory (Right) -->
+      <section class="dashboard-grid">
+        
+        <!-- Raw Atmospheric Conditions Card -->
+        <div class="card conditions-card" id="conditionsCard">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h3 class="card-title">Live Atmospheric Metrics</h3>
+              <span class="card-subtitle">Zero-latency sensor data via Open-Meteo</span>
+            </div>
+            <div class="weather-temp-badge" id="weatherConditionPill">
+              <span id="weatherConditionIcon">⛅</span>
+              <span id="weatherConditionText">Loading...</span>
+            </div>
+          </div>
+
+          <!-- Main Stats Display -->
+          <div class="conditions-hero-row">
+            <!-- Temperature Block -->
+            <div class="temp-display-block">
+              <div class="temp-huge-num">
+                <span id="tempValue">--</span><span class="temp-unit">°C</span>
+              </div>
+              <div class="temp-meta">
+                <span class="feels-like-text">Feels like <strong id="feelsLikeValue">--°C</strong></span>
+                <span class="temp-timestamp" id="conditionsTimestamp">Updated just now</span>
+              </div>
+            </div>
+
+            <!-- AQI Gauge Block -->
+            <div class="aqi-gauge-block">
+              <div class="aqi-ring-container">
+                <svg class="aqi-ring-svg" viewBox="0 0 120 120">
+                  <circle class="aqi-ring-bg" cx="60" cy="60" r="50"></circle>
+                  <circle class="aqi-ring-progress" id="aqiRingProgress" cx="60" cy="60" r="50"></circle>
+                </svg>
+                <div class="aqi-ring-inner">
+                  <span class="aqi-label-micro">US AQI</span>
+                  <span class="aqi-number-huge" id="aqiValue">--</span>
+                </div>
+              </div>
+              <div class="aqi-meta">
+                <span class="aqi-category-badge" id="aqiCategoryBadge">Calculating...</span>
+                <span class="aqi-standard-note">EPA Standard Scale (0-500)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Atmospheric Breakdown Badges -->
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <div class="metric-icon-wrap icon-purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <div class="metric-data">
+                <span class="metric-label">PM2.5 Micro-particles</span>
+                <span class="metric-value"><strong id="pm25Value">--</strong> <small>µg/m³</small></span>
+                <span class="metric-sub" id="pm25Context">EPA Guide: &lt;12 Safe</span>
+              </div>
+            </div>
+
+            <div class="metric-item">
+              <div class="metric-icon-wrap icon-blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"/></svg>
+              </div>
+              <div class="metric-data">
+                <span class="metric-label">PM10 Coarse Dust</span>
+                <span class="metric-value"><strong id="pm10Value">--</strong> <small>µg/m³</small></span>
+                <span class="metric-sub" id="pm10Context">EPA Guide: &lt;54 Safe</span>
+              </div>
+            </div>
+
+            <div class="metric-item">
+              <div class="metric-icon-wrap icon-cyan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
+              </div>
+              <div class="metric-data">
+                <span class="metric-label">Relative Humidity</span>
+                <span class="metric-value"><strong id="humidityValue">--</strong> <small>%</small></span>
+                <span class="metric-sub">Air moisture level</span>
+              </div>
+            </div>
+
+            <div class="metric-item">
+              <div class="metric-icon-wrap icon-teal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2M9.6 4.6A2 2 0 1 1 11 8H2M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>
+              </div>
+              <div class="metric-data">
+                <span class="metric-label">Wind Dispersion</span>
+                <span class="metric-value"><strong id="windValue">--</strong> <small>km/h</small></span>
+                <span class="metric-sub">Pollution ventilation</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Personalized AI Health Advisory Card -->
+        <div class="card advisory-card" id="advisoryCard">
+          <div class="advisory-card-glow" id="advisoryGlow"></div>
+          
+          <div class="card-header advisory-header">
+            <div class="card-title-group">
+              <div class="advisory-badge-row">
+                <span class="ai-sparkle-pill">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sparkle-icon">
+                    <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>
+                  </svg>
+                  Personalized Advisory
+                </span>
+                <span class="advisory-engine-tag" id="advisoryEngineTag">AI Engine</span>
+              </div>
+              <h3 class="advisory-title">Your Tailored Health Impact</h3>
+            </div>
+
+            <!-- Risk Level Indicator Pill -->
+            <div class="risk-badge-wrapper">
+              <div class="risk-level-badge risk-low" id="riskBadge">
+                <span class="risk-pulse-dot"></span>
+                <span id="riskLevelText">LOW RISK</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading Skeleton (Shown while AI generates advisory) -->
+          <div class="advisory-skeleton hidden" id="advisorySkeleton">
+            <div class="skeleton-line skeleton-headline shimmer"></div>
+            <div class="skeleton-line skeleton-p1 shimmer"></div>
+            <div class="skeleton-line skeleton-p2 shimmer"></div>
+            <div class="skeleton-boxes">
+              <div class="skeleton-box shimmer"></div>
+              <div class="skeleton-box shimmer"></div>
+              <div class="skeleton-box shimmer"></div>
+            </div>
+            <div class="skeleton-sub">Synthesizing personalized advisory with LLM reasoning...</div>
+          </div>
+
+          <!-- Real Advisory Content -->
+          <div class="advisory-content" id="advisoryContent">
+            <!-- Personalized Target Profile Snippet -->
+            <div class="profile-context-strip">
+              <span class="context-label">Synthesized For:</span>
+              <span class="context-profile" id="advisoryProfileTag">Adult • Mostly Indoors • No chronic conditions</span>
+              <button class="btn-link-edit" id="quickEditProfileBtn">Change</button>
+            </div>
+
+            <!-- 1-line Headline -->
+            <h4 class="advisory-headline" id="advisoryHeadline">Favorable conditions for your routine</h4>
+
+            <!-- 2-4 sentence Plain English Advisory -->
+            <p class="advisory-text" id="advisoryText">
+              Air quality in your area is clean with minimal pollutant density. Conditions pose negligible concern for your profile. It's an ideal window for standard outdoor commutes and open-air ventilation.
+            </p>
+
+            <!-- Concrete Actionable Recommendations -->
+            <div class="recommendations-section">
+              <div class="recs-header">
+                <span class="recs-title">ACTIONABLE RECOMMENDATIONS</span>
+                <button class="btn-text-audio" id="speakAdvisoryBtn" title="Listen to advisory (Read aloud)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="speaker-icon">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                  </svg>
+                  <span id="speakBtnText">Read Aloud</span>
+                </button>
+              </div>
+              <ul class="recs-list" id="recsList">
+                <li class="rec-item">
+                  <div class="rec-check-icon">✓</div>
+                  <span>Take advantage of clean air for outdoor exercise or active commuting</span>
+                </li>
+                <li class="rec-item">
+                  <div class="rec-check-icon">✓</div>
+                  <span>Open windows to ventilate indoor living spaces</span>
+                </li>
+                <li class="rec-item">
+                  <div class="rec-check-icon">✓</div>
+                  <span>Standard routines can proceed without respiratory restrictions</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="advisory-footer-note">
+            <span class="disclaimer-icon">ℹ️</span>
+            <span>Preventative guidance tailored to your self-reported profile. Not formal medical diagnosis.</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 7-Day History & Trends Section -->
+      <section class="history-section" id="historySection">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="section-eyebrow">LONGITUDINAL MONITORING</span>
+            <h3 class="section-title">7-Day Alert History & Trend Analytics</h3>
+            <p class="section-desc">Track how environmental shifts and AQI spikes impact your personal health risk over time.</p>
+          </div>
+          <div class="history-tools">
+            <button id="seedDemoHistoryBtn" class="btn-outline btn-sm" title="Seed realistic 7-day variation history for demoing">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="seed-icon">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+              <span>Seed 7-Day Demo Trend</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Trend Chart Container -->
+        <div class="card chart-card">
+          <div class="chart-header">
+            <div class="chart-legend">
+              <div class="legend-item">
+                <span class="legend-dot dot-aqi"></span>
+                <span>AQI Level (0-300)</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot dot-risk"></span>
+                <span>Personalized Risk (1-4)</span>
+              </div>
+            </div>
+            <span class="chart-note">Hover points for detailed conditions snapshot</span>
+          </div>
+
+          <!-- Interactive Canvas Chart -->
+          <div class="chart-canvas-wrapper">
+            <canvas id="trendChartCanvas" height="260"></canvas>
+            <div class="chart-empty-state hidden" id="chartEmptyState">
+              <div class="empty-icon">📊</div>
+              <h4>No History Recorded Yet</h4>
+              <p>Generate advisories over time or click "Seed 7-Day Demo Trend" above to explore longitudinal trends.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Expandable Alert History Log -->
+        <div class="history-log-container">
+          <h4 class="history-log-title">Historical Advisory Snapshots</h4>
+          <div class="history-list" id="historyList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. Profile Setup & Edit Modal -->
+  <div class="modal-overlay hidden" id="profileModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-eyebrow">HEALTH PROFILE</span>
+          <h3 class="modal-title" id="profileModalTitle">Personalize Your Advisor</h3>
+        </div>
+        <button class="btn-close-modal" id="closeProfileModalBtn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-intro">
+          Standard weather alerts apply one generic threshold to everyone. Tell us about yourself so AeroCare can calibrate recommendations specifically to your respiratory and cardiovascular tolerance.
+        </p>
+
+        <!-- Quick Demo Presets for Judges -->
+        <div class="demo-preset-strip">
+          <span class="preset-label">Quick 1-Click Presets:</span>
+          <div class="preset-buttons">
+            <button type="button" class="btn-preset" id="presetHealthyBtn">🏃 Healthy Adult</button>
+            <button type="button" class="btn-preset" id="presetAsthmaBtn">🫁 Senior w/ Asthma</button>
+            <button type="button" class="btn-preset" id="presetOutdoorBtn">👷 Outdoor Worker</button>
+          </div>
+        </div>
+
+        <form id="profileForm" class="profile-form">
+          <!-- Profile Name / Label -->
+          <div class="form-group">
+            <label for="profNameInput">Profile Label / Name</label>
+            <input type="text" id="profNameInput" placeholder="e.g. Alex (Personal), Mom, Work Profile" value="Alex">
+          </div>
+
+          <!-- Age Group -->
+          <div class="form-group">
+            <label>Age Group</label>
+            <div class="options-grid options-4">
+              <label class="option-card">
+                <input type="radio" name="age_group" value="child">
+                <div class="option-card-inner">
+                  <span class="option-icon">🧒</span>
+                  <span class="option-title">Child</span>
+                  <span class="option-sub">&lt; 13 yrs</span>
+                </div>
+              </label>
+
+              <label class="option-card">
+                <input type="radio" name="age_group" value="teen">
+                <div class="option-card-inner">
+                  <span class="option-icon">🧑</span>
+                  <span class="option-title">Teen</span>
+                  <span class="option-sub">13-17 yrs</span>
+                </div>
+              </label>
+
+              <label class="option-card">
+                <input type="radio" name="age_group" value="adult" checked>
+                <div class="option-card-inner">
+                  <span class="option-icon">👤</span>
+                  <span class="option-title">Adult</span>
+                  <span class="option-sub">18-64 yrs</span>
+                </div>
+              </label>
+
+              <label class="option-card">
+                <input type="radio" name="age_group" value="senior">
+                <div class="option-card-inner">
+                  <span class="option-icon">🧓</span>
+                  <span class="option-title">Senior</span>
+                  <span class="option-sub">65+ yrs</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Health Conditions (Multi-select) -->
+          <div class="form-group">
+            <label>Health Conditions (Select all that apply)</label>
+            <div class="checkbox-pills-grid">
+              <label class="pill-checkbox">
+                <input type="checkbox" name="health_conditions" value="asthma">
+                <span class="pill-box">🫁 Asthma / Bronchitis</span>
+              </label>
+
+              <label class="pill-checkbox">
+                <input type="checkbox" name="health_conditions" value="copd">
+                <span class="pill-box">💨 COPD</span>
+              </label>
+
+              <label class="pill-checkbox">
+                <input type="checkbox" name="health_conditions" value="heart_condition">
+                <span class="pill-box">❤️ Heart / Cardiovascular</span>
+              </label>
+
+              <label class="pill-checkbox">
+                <input type="checkbox" name="health_conditions" value="pregnant">
+                <span class="pill-box">🤰 Pregnancy</span>
+              </label>
+
+              <label class="pill-checkbox">
+                <input type="checkbox" name="health_conditions" value="none" checked id="condNoneCheckbox">
+                <span class="pill-box">✨ None / Healthy</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Occupation & Daily Exposure -->
+          <div class="form-group">
+            <label>Daily Exposure & Occupation Type</label>
+            <div class="options-grid options-4">
+              <label class="option-card">
+                <input type="radio" name="occupation_exposure" value="mostly_indoor" checked>
+                <div class="option-card-inner">
+                  <span class="option-icon">🏢</span>
+                  <span class="option-title">Mostly Indoor</span>
+                  <span class="option-sub">Office / Home</span>
+                </div>
+              </label>
+
+              <label class="option-card">
+                <input type="radio" name="occupation_exposure" value="commuter">
+                <div class="option-card-inner">
+                  <span class="option-icon">🚇</span>
+                  <span class="option-title">Commuter</span>
+                  <span class="option-sub">Transit / Roads</span>
+                </div>
+              </label>
+
+              <label class="option-card">
+                <input type="radio" name="occupation_exposure" value="outdoor_worker">
+                <div class="option-card-inner">
+                  <span class="option-icon">🏗️</span>
+                  <span class="option-title">Outdoor Worker</span>
+                  <span class="option-sub">6-8 hrs outside</span>
+                </div>
+              </label>
+
+              <label class="option-card">
+                <input type="radio" name="occupation_exposure" value="athlete">
+                <div class="option-card-inner">
+                  <span class="option-icon">🚴</span>
+                  <span class="option-title">Athlete</span>
+                  <span class="option-sub">Intense cardio</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn-ghost" id="cancelProfileBtn">Cancel</button>
+            <button type="submit" class="btn-primary" id="saveProfileBtn">Save & Apply Profile</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Judge Demo Comparator Modal (Section 12 of Spec) -->
+  <div class="modal-overlay hidden" id="compareModal">
+    <div class="modal-dialog modal-wide">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-eyebrow">HACKATHON DEMO SHOWCASE</span>
+          <h3 class="modal-title">Side-by-Side Personalized Risk Contrast</h3>
+        </div>
+        <button class="btn-close-modal" id="closeCompareModalBtn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="compare-intro-banner">
+          <span class="intro-badge">THE CORE PROBLEM</span>
+          <p>
+            Standard alert systems show <strong>identical generic warnings</strong> regardless of individual vulnerability. Observe below how our system evaluates the <strong>exact same live weather & AQI conditions</strong> for two different people:
+          </p>
+          <div class="compare-current-conds" id="compareConditionsSummary">
+            <span>Atmosphere: AQI -- • Temp --°C • PM2.5 -- µg/m³</span>
+          </div>
+        </div>
+
+        <div class="compare-columns-grid">
+          <!-- Profile A (Healthy) -->
+          <div class="compare-card" id="compareCardA">
+            <div class="compare-card-header">
+              <span class="compare-col-tag">PROFILE A</span>
+              <h4 class="compare-profile-title">Healthy Adult Office Worker</h4>
+              <span class="compare-meta">Adult (18-64) • Mostly Indoor • No chronic conditions</span>
+            </div>
+            <div class="compare-result" id="compareResultA">
+              <div class="compare-risk-pill risk-low">LOW RISK</div>
+              <h5 class="compare-headline">Favorable conditions for routine</h5>
+              <p class="compare-text">Standard outdoor activities and office commutes proceed without elevated respiratory burden.</p>
+              <ul class="compare-recs">
+                <li>Normal outdoor routines safe</li>
+                <li>Indoor ventilation beneficial</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- VS Divider -->
+          <div class="compare-divider">
+            <span class="vs-circle">VS</span>
+          </div>
+
+          <!-- Profile B (Vulnerable) -->
+          <div class="compare-card card-vulnerable" id="compareCardB">
+            <div class="compare-card-header">
+              <span class="compare-col-tag tag-warning">PROFILE B</span>
+              <h4 class="compare-profile-title">Senior w/ Asthma & Outdoor Work</h4>
+              <span class="compare-meta">Senior (65+) • Outdoor Worker • Asthma & Heart Condition</span>
+            </div>
+            <div class="compare-result" id="compareResultB">
+              <div class="compare-risk-pill risk-high">HIGH RISK</div>
+              <h5 class="compare-headline">Elevated Respiratory Hazard</h5>
+              <p class="compare-text">Same atmospheric particulate density triggers bronchial constriction and increased cardiac strain during prolonged exposure.</p>
+              <ul class="compare-recs">
+                <li>Keep rescue inhaler immediately accessible</li>
+                <li>Wear certified N95 mask outdoors</li>
+                <li>Reschedule strenuous tasks</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions text-center">
+          <button type="button" class="btn-primary" id="regenerateCompareBtn">
+            Re-evaluate Live Conditions for Both
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/chart.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
